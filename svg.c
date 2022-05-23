@@ -17,6 +17,9 @@ struct svg_document* svg_new_document() {
 
     struct svg_document *doc = (struct svg_document *)malloc(sizeof(struct svg_document));
     doc->root = svg_new_node("svg");
+    svg_set_attr(doc->root, "xmlns", "http://www.w3.org/2000/svg");
+    svg_set_attr(doc->root, "xmlns:xlink", "http://www.w3.org/1999/xlink");
+
     debug(".. allocated: %x\n", doc);
     return doc;
 }

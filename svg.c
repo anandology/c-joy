@@ -10,8 +10,6 @@
 #define debug(...)
 #endif
 
-struct svg_buffer * svg_new_buffer();
-
 // Creates a new svg_document
 // The caller must free this by calling free_svg_document function.
 struct svg_document* svg_new_document() {
@@ -45,13 +43,52 @@ struct svg_attr* svg_new_attr(char *attr_name, char *attr_value) {
     return attr;
 }
 
+void buffer_write2(struct svg_buffer *buf, char* s1, char *s2) {
+    svg_buffer_append(buf, s1);
+    svg_buffer_append(buf, s2);
+}
+
+void buffer_write3(struct svg_buffer *buf, char* s1, char *s2, char *s3) {
+    svg_buffer_append(buf, s1);
+    svg_buffer_append(buf, s2);
+    svg_buffer_append(buf, s3);
+}
+void buffer_write6(
+        struct svg_buffer *buf,
+        char* s1, char *s2, char *s3,
+        char* s4, char *s5, char *s6) {
+    svg_buffer_append(buf, s1);
+    svg_buffer_append(buf, s2);
+    svg_buffer_append(buf, s3);
+    svg_buffer_append(buf, s4);
+    svg_buffer_append(buf, s5);
+    svg_buffer_append(buf, s6);
+}
+
+
+void write_node(struct svg_buffer *buf, struct svg_node *node) {
+    debug("write_node %s %x\n", node->tag, node->children);
+    buffer_write2(buf, "<", node->tag);
+    if (node->attrs) {
+        for (struct svg_attr *a=node->attrs; a != NULL; a=a->next){
+            buffer_write6(buf, " ", a->attr_name, "=", "\"", a->attr_value, "\"");
+        }
+    }
+    svg_buffer_append(buf, ">");
+    for (struct svg_node *c=node->children; c != NULL; c=c->next) {
+        write_node(buf, c);
+    }
+    buffer_write3(buf, "</", node->tag, ">");
+}
 
 // renders the svg document as text.
 // returns an svg_buffer, the caller must free it by calling
 // svg_free_buffer function.
 struct svg_buffer* svg_render_document(struct svg_document *doc) {
     debug("svg_render_document: %x\n", doc);
-    return svg_new_buffer();
+    struct svg_buffer *buf = svg_new_buffer(10);
+    write_node(buf, doc->root);
+    return buf;
 }
 
 // Inserts a new node as the last child of the parent node
@@ -119,13 +156,31 @@ void svg_free_document(struct svg_document *doc) {
     debug("svg_free_document: %x\n", doc);
 }
 
-struct svg_buffer * svg_new_buffer() {
-    debug("svg_new_buffer()\n");
+struct svg_buffer * svg_new_buffer(int capacity) {
+    debug("svg_new_buffer(%d)\n", capacity);
     struct svg_buffer *buf = (struct svg_buffer *)malloc(sizeof(struct svg_buffer));
-    buf->size = 0;
-    buf->capacity = 0;
-    buf->text = "";
+    buf->size = 1;
+    buf->capacity = capacity;
+    buf->text = (char *)malloc(capacity * sizeof(char));
+    buf->text[0] = '\0';
     return buf;
+}
+
+int max(int a, int b) {
+    return a > b? a: b;
+}
+
+void svg_buffer_append(struct svg_buffer *buf, char *s) {
+    // debug("svg_buffer_append %x %s\n", buf, s);
+
+    int n = strlen(s);
+    if (buf->size+n > buf->capacity) {
+        buf->capacity = max(2*buf->capacity, buf->size+n);
+        buf->text = (char *)realloc(buf->text, buf->capacity);
+    }
+    char *start = buf->text+ buf->size - 1;
+    strcpy(start, s);
+    buf->size += n;
 }
 
 // frees an svg_buffer

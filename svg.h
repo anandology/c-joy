@@ -49,6 +49,9 @@ void svg_insert_node(struct svg_node *parent, struct svg_node *node);
 void svg_set_attr(struct svg_node *node, char *attr_name, char *attr_value);
 char * svg_get_attr(struct svg_node *node, char *attr_name);
 
+struct svg_buffer * svg_new_buffer(int capacity);
+void svg_buffer_append(struct svg_buffer *buf, char *s);
+
 // Frees an svg node and all its children
 void svg_free_node(struct svg_node *node);
 

@@ -56,6 +56,8 @@ void test_svg_set_attr() {
 
     char *y = svg_get_attr(node, "y");
     assert_string(y, "50");
+
+    printf("test_svg_set_attr: pass\n");
 }
 
 void test_svg_set_attr_overwrite() {
@@ -65,6 +67,40 @@ void test_svg_set_attr_overwrite() {
 
     char *x = svg_get_attr(node, "x");
     assert_string(x, "50");
+    printf("test_svg_set_attr_overwrite: pass\n");
+}
+
+void test_svg_buffer_append() {
+    struct svg_buffer *buf = svg_new_buffer(10);
+    assert_string(buf->text, "");
+
+    svg_buffer_append(buf, "hello");
+    assert_string(buf->text, "hello");
+    assert(buf->capacity == 10);
+
+    svg_buffer_append(buf, "world");
+    assert_string(buf->text, "helloworld");
+    assert(buf->capacity == 20);
+    printf("test_svg_buffer_append: pass\n");
+}
+
+void test_svg_render_document() {
+    struct svg_document *doc = svg_new_document();
+    struct svg_buffer *buf = svg_render_document(doc);
+    assert_string(buf->text, "<svg></svg>");
+
+    struct svg_node *node = svg_new_node("circle");
+    svg_insert_node(doc->root, node);
+    buf = svg_render_document(doc);
+    assert_string(buf->text, "<svg><circle></circle></svg>");
+
+    svg_set_attr(node, "x", "10");
+    svg_set_attr(node, "y", "20");
+    svg_set_attr(node, "r", "50");
+    buf = svg_render_document(doc);
+    assert_string(buf->text, "<svg><circle x=\"10\" y=\"20\" r=\"50\"></circle></svg>");
+
+    printf("test_svg_render_document: pass\n");
 }
 
 int main() {
@@ -73,6 +109,8 @@ int main() {
     test_svg_insert_node();
     test_svg_set_attr();
     test_svg_set_attr_overwrite();
+    test_svg_buffer_append();
+    test_svg_render_document();
 
     // struct svg_document *doc = svg_new_document();
 

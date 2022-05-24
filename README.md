@@ -6,22 +6,20 @@
 
 ## API
 
-Shape c;
+Here is how you draw a circle.
 
-c = cirlce(10, 10, 20);
-c.strokeWidth = 5;
-c.stroke = "red";
-c.fill = "blue";
+```
+#include "joy.h"
 
-show(c);
+int main() {
+    shape c = circle(0, 0, 100);
+    show(c);
+}
+```
 
-//
+Checkout the [Proposed API][1] to know more.
 
-Shape c;
+[1]: https://github.com/anandology/c-joy/issues/1
 
-c = apply(c, rotate(40))
-c = apply(c, repeat(4, rotate(40)))
-
-rotate(c, 40)
-repeat(c, 4, rotate(40))
-
+You can also look at the live preview at:
+<https://sandbox.anandology.com/joy/>
